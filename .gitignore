@@ -50,3 +50,4 @@ media/*
 !media/.keep
 
 *.lock
+!bun.lock
