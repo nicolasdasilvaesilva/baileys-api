@@ -1,0 +1,30 @@
+version: "3"
+
+services:
+  baileys-api:
+    image: "ghcr.io/indica-facil/baileys-api:latest"
+    pull_policy: always
+    volumes:
+      - "storage:/app/storage"
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=${REDIS_URL}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - BAILEYS_LOG_LEVEL=${BAILEYS_LOG_LEVEL:-error}
+      - BAILEYS_PROVIDER_DEFAULT_API_KEY=${SERVICE_PASSWORD_64_DEFAULTAPIKEY}
+      - MEDIA_CLEANUP_ENABLED=${MEDIA_CLEANUP_ENABLED:-true}
+      - MEDIA_CLEANUP_INTERVAL_MS=${MEDIA_CLEANUP_INTERVAL_MS:-3600000}
+      - MEDIA_MAX_AGE_HOURS=${MEDIA_MAX_AGE_HOURS:-24}
+    command:
+      - sh
+      - "-c"
+      - "bun manage-api-keys create user ${SERVICE_PASSWORD_64_DEFAULTAPIKEY} && bun start"
+    restart: always
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - "wget -qO- http://localhost:3025/status"
+      interval: 20s
+      timeout: 20s
+      retries: 10
